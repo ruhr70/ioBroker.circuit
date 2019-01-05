@@ -4,7 +4,7 @@
 
 Übersicht der aus dem SDK bereitgestellten API Funktionen:
 
-- getConversationById(convId)
+- [getConversationById(convId)](#getconversationbyidconvid)
 - getConversationParticipants(convId,[options])
 - getConversations ([options])
 
