@@ -633,12 +633,15 @@ const CircuitBot = function(){
     this.dpUsersPresence = function dpUsersPresence(userId) {
         adapter.log.debug("dpUsersPresence(userId) mit userId = " + userId + " aufgerufen");
         const objName = "users." + myUsers[userId].userId;
+        adapter.log.debug("dpUsersPresence(userId) objName = " + objName);
 
         let index = -1;
         for (let i = 0; i < myUsersPresence.length; i++) {
             if (myUsersPresence[i].userId === userId) index = i;
         }
 
+        adapter.log.debug("dpUsersPresence:  myUsersPresence[index]" +  myUsersPresence[index]);
+        adapter.log.debug("dpUsersPresence:  myUsersPresence[index].mobile" +  myUsersPresence[index].mobile);
         adapter.log.debug("dpUsersPresence: myUsersPresence[index].mobile: " + myUsersPresence[index].mobile + ", myUsersPresence[index]: " + JSON.stringify(myUsersPresence[index]));
 
         const mobileStr = (myUsersPresence[index].mobile) ? " (MOBILE)" : "";
