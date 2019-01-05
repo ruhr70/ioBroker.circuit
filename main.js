@@ -301,6 +301,7 @@ function stateChange(id, state) {
             return;
         }
         standardContent.content = state.val; // den Text im StandardContent (mit der gewünschten parentId) gegen state.val des Datenpunktsaustauschen
+        adapter.log.debug("_sendToStandardConversation, addTextItem() mit standardConvId: " + standardConvId + ", Standard Content: " + standardContent);
         circuitBot.addTextItem(standardConvId,standardContent)
             .then(answer => {
                 const answerText = JSON.stringify(answer);
@@ -398,9 +399,8 @@ const CircuitBot = function(){
 
             testStandardConvId(adapter.config.standardconversation);
             await self.dpCconversations(conversations,true);
-            initMyVarsOK = true; // myUsers und myConversations Variablen sind gefüllt
-            await self.dpMyUsersPresence(); // myPresence schreiben -> aktueller Präsenz ALLER User (in myPresence und dem DP)
-            self.dpUsers(myUsers);
+            await self.dpUsers(myUsers);
+            self.dpMyUsersPresence(); // myPresence schreiben -> aktueller Präsenz ALLER User (in myPresence und dem DP)
             
         } catch(err) {
             adapter.log.warn("initDp(): " + err);    
@@ -443,8 +443,10 @@ const CircuitBot = function(){
         (stdConvIdArr[1] !== "error") ? standardContent.parentId = stdConvIdArr[1] : delete standardContent.parentId;
         standardConvId = stdConvIdArr[0];
         adapter.log.debug("standardContent: "+JSON.stringify(standardContent));
-        adapter.log.debug("standardConvId: " + standardConvId);
+        adapter.log.info("standardConvId: " + standardConvId);
         adapter.log.debug("standardConvIdValid:" + standardConvIdValid);
+
+        adapter.setState("_sendToStandardConversationAnswer","Standardkonversation: " + standardConvId+ (stdConvIdArr[1] !== "error") ? " itemId: " + stdConvIdArr[1] : "",true );
     }
 
 
@@ -558,6 +560,7 @@ const CircuitBot = function(){
 
             adapter.log.debug("myUsersConversations:" + JSON.stringify(myUsersConversations));
             self.writeDpMyUsersConversations();
+            initMyVarsOK = true; // myUsers und myConversations Variablen sind gefüllt
 
         } catch(err) {
             adapter.log.warn("dpConversations(conversations,all): " + err);    
@@ -571,6 +574,7 @@ const CircuitBot = function(){
     /** @function fragt die Presence ALLER User über die API ab, setzt die Subscriptions für Presence und schreibt die globale Variabe myPresence */
     this.dpMyUsersPresence = async function dpMyUsersPresence() {
         try {
+            if(!initMyVarsOK) adapter.log.warn("myUsers ist noch leer, wird aber benötigt");
             adapter.log.debug("dpMyUsersPresence(): myUsersList: " + myUsersList);
             myUsersPresence = await client.getPresence(myUsersList,true); // aktuelle Präsenz aller User (myUsersList) über die API abfragen (true => erweiterte Präsenz)
             adapter.log.debug("dpMyUsersPresence(): myUsersPresence: " + JSON.stringify(myUsersPresence));
@@ -603,9 +607,15 @@ const CircuitBot = function(){
 
             adapter.setObjectNotExists(objName+".object", {type: "state",common: {name: "User Objekt",type:"string",role:"text",read:true,write:false},native: {}});
             adapter.setObjectNotExists(objName+".url", {type: "state",common: {name: "Circuit URL zum User",type:"string",role:"text",read:true,write:false},native: {}});
+            adapter.setObjectNotExists(objName+".userType", {type: "state",common: {name: "User Typ",type:"string",role:"text",read:true,write:false},native: {}});
+            adapter.setObjectNotExists(objName+".userState", {type: "state",common: {name: "User Status",type:"string",role:"text",read:true,write:false},native: {}});
+            adapter.setObjectNotExists(objName+".displayName", {type: "state",common: {name: "User Status",type:"string",role:"text",read:true,write:false},native: {}});
+
             adapter.setState(objName+".object",JSON.stringify(myUsers[userId]),true);
             adapter.setState(objName+".url","https://" + adapter.config.circuit_domain+"/#/email/" + myUsers[userId].emailAddress,true);
-
+            adapter.setState(objName+".userType",myUsers[userId].userType,true);
+            adapter.setState(objName+".userState",myUsers[userId].userState,true);
+            adapter.setState(objName+".displayName",myUsers[userId].displayName,true);
 
             self.dpUsersPresence(userId);
         }
@@ -1232,6 +1242,7 @@ const CircuitBot = function(){
                 })
                 .catch(/** @param {object} error*/error => {
                     const errorStr = JSON.stringify(error);
+                    adapter.log.debug("addTextItem(), error.message: " + error.message);
                     adapter.log.debug("addTextItem(): " + errorStr);
                     reject(new Error(error));
                 });
