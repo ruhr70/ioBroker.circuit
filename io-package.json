@@ -1,0 +1,598 @@
+{
+    "common": {
+        "name": "circuit",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie"
+            }
+        },
+        "title": "Circuit",
+        "titleLang": {
+            "en": "Circuit",
+            "de": "Circuit",
+            "ru": "Circuit",
+            "pt": "Circuit",
+            "nl": "Circuit",
+            "fr": "Circuit",
+            "it": "Circuit",
+            "es": "Circuit",
+            "pl": "Circuit"
+        },
+        "desc": {
+            "en": "Circuit",
+            "de": "Unify Circuit Anbindung an ioBroker. Team-Messaging und Kollaboration. Anwendungsfälle sind z.B. ein Bot für Circuit oder die Kopplung von anderen Dienste über ioBroker als Vermittler.",
+            "ru": "Circuit",
+            "pt": "Circuit",
+            "nl": "Circuit",
+            "fr": "Circuit",
+            "it": "Circuit",
+            "es": "Circuit",
+            "pl": "Circuit"
+        },
+        "authors": [
+            "ruhr70 <ruhr70@herwig.de>"
+        ],
+        "keywords": [
+            "Unify",
+            "Circuit",
+            "Bot",
+            "Middleware",
+            "Messaging",
+            "Kollaboration"
+        ],
+        "platform": "Javascript/Node.js",
+        "main": "main.js",
+        "icon": "circuit.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/ruhr70/ioBroker.circuit/master/admin/circuit.png",
+        "readme": "https://github.com/ruhr70/ioBroker.circuit/blob/master/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "messaging",
+        "messagebox": true,
+        "subscribe": "messagebox",
+        "materialize": true,
+        "compact": true,
+        "dependencies": [
+            {
+                "admin": ">=3.0.0"
+            }
+        ]
+    },
+    "native": {
+        "client_id": "",
+        "client_secret": "",
+        "circuit_domain": "eu.yourcircuit.com",
+        "standardconversation": ""
+    },
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "If communication with circuit works",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.lastConnectionState",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Last Connection State",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.lastReconnectFailed",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Letzter erfolgloser Reconnect Versuch",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.lastEventType",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Letzter Event Typ",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.lastEvent",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Letzter Event",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot",
+            "type": "channel",
+            "common": {
+                "name": "Informationen zum Circuit Bot"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.name",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Name des Bots",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": "<<noch keine Anmeldung erfolgt>>"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.emailAddress",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Email-Adresse des Bots",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": "<<noch keine Anmeldung erfolgt>>"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.userId",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "User ID des Bots",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": "<<noch keine Anmeldung erfolgt>>"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.tenantId",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Mandanten ID",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": "<<noch keine Anmeldung erfolgt>>"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.clientId",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Client ID",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": "<<noch keine Anmeldung erfolgt>>"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.accountId",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Account ID",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": "<<noch keine Anmeldung erfolgt>>"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.creationTime",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Datum, zu dem der Bot erstellt wurde",
+                "type": "number",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.lastAccess",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Datum, letzte Anmeldung",
+                "type": "number",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.lastLogonError",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Datum, letzter Logon Error",
+                "type": "number",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.creationTimeTxt",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Datum, zu dem der Bot erstellt wurde als Text",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": "<<noch keine Anmeldung erfolgt>>"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.lastAccessTxt",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Datum, letzte Anmeldung als Text",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": "<<noch keine Anmeldung erfolgt>>"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.bot.logonJson",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Komplette JSON Logon-Meldung",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": "<<noch keine Anmeldung erfolgt>>"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.adapter",
+            "type": "channel",
+            "common": {
+                "name": "Informationen zum Adapter"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.adapter.lastStart",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "letzter Start des Adapters",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.adapter.lastStop",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "letzter Stopp des Adapters",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.circuit",
+            "type": "channel",
+            "common": {
+                "name": "Informationen zu Circuit"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.circuit.apiVersion",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "API Version",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": "<<noch keine Anmeldung erfolgt>>"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.circuit.circuitDomain",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Circuit Domäne des Bots",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "abfragen",
+            "type": "channel",
+            "common": {
+                "name": "Abfragen über die Circuit API"
+            },
+            "native": {}
+        },
+        {
+            "_id": "abfragen.getUserById",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Einen User anhand der Circuit User ID abfragen",
+                "type": "string",
+                "read": true,
+                "write": true
+            },
+            "native": {}
+        },
+        {
+            "_id": "abfragen.getUserByIdAnswer",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Antwort User-Objekt anhand der Circuit User ID abfragen",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "abfragen.getUserByEmail",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Einen User anhand der Circuit Email abfragen",
+                "type": "string",
+                "read": true,
+                "write": true
+            },
+            "native": {}
+        },
+        {
+            "_id": "abfragen.getUserByEmailAnswer",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Antwort User-Objekt anhand der Circuit Email abfragen",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "abfragen.getConversationParticipants",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Alle Teilnehmer einer Konversation anhand der convId odr url abfragen ",
+                "type": "string",
+                "read": true,
+                "write": true
+            },
+            "native": {}
+        },
+        {
+            "_id": "abfragen.getConversationParticipantsAnswer",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Antwort: Teilnehmerliste einer Konversation",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "abfragen.getConversationById",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Konversation anhand der convId oder url abfragen ",
+                "type": "string",
+                "read": true,
+                "write": true
+            },
+            "native": {}
+        },
+        {
+            "_id": "abfragen.getConversationByIdAnswer",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Antwort: Konversation",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "commands",
+            "type": "channel",
+            "common": {
+                "name": "Kommandos über die Circuit API"
+            },
+            "native": {}
+        },
+        {
+            "_id": "commands.removeParticipant",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "convId (str), userIds (str oder arr.str). Einen oder mehrere User aus einer Konversation entfernen.",
+                "type": "string",
+                "read": true,
+                "write": true
+            },
+            "native": {}
+        },
+        {
+            "_id": "commands.removeParticipantAnswer",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Antwort auf das Kommando removeParticipant",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "konversationen",
+            "type": "channel",
+            "common": {
+                "name": "Konversationen, an denen der Bot beteiligt ist"
+            },
+            "native": {}
+        },
+        {
+            "_id": "konversationen.DIRECT",
+            "type": "channel",
+            "common": {
+                "name": "Private Konversationen mit einem Teilnehmer"
+            },
+            "native": {}
+        },
+        {
+            "_id": "konversationen.GROUP",
+            "type": "channel",
+            "common": {
+                "name": "Gruppenkonversationen des Bots"
+            },
+            "native": {}
+        },
+        {
+            "_id": "konversationen.COMMUNITY",
+            "type": "channel",
+            "common": {
+                "name": "Communitys, in denen der Bot Mitglied ist"
+            },
+            "native": {}
+        },
+        {
+            "_id": "users",
+            "type": "channel",
+            "common": {
+                "name": "Teilnehmer einer Konversation mit dem Bot"
+            },
+            "native": {}
+        },
+        {
+            "_id": "users.presence",
+            "type": "channel",
+            "common": {
+                "name": "Präsenzstatus der Teilnehmer"
+            },
+            "native": {}
+        },
+        {
+            "_id": "variablen",
+            "type": "channel",
+            "common": {
+                "name": "Variablen, mit denen der Adapter intern arbeitet"
+            },
+            "native": {}
+        },
+        {
+            "_id": "_sendToStandardConversation",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "String oder Objekt zur Standardkonversation",
+                "type": "string",
+                "read": true,
+                "write": true
+            },
+            "native": {}
+        },
+        {
+            "_id": "_sendToStandardConversationAnswer",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Antwort der API zum gesendeten Text oder Objekt",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        }
+    ]
+}
