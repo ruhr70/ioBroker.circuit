@@ -598,12 +598,14 @@ const CircuitBot = function(){
 
     /** @param {object} users - in der Regel das myUsers Objekt, auch ein einzelnes Objekt mit einem User ist möglich*/
     this.dpUsers = function dpUsers(users) {
-        adapter.log.info("Datenpunkte **users** anlegen");
+        adapter.log.info("Datenpunkte **users** anlegen für " + JSON.stringify(users));
         for (const userId in users) {
             const objName = "users." + myUsers[userId].userId;
             const userType = (myUsers[userId].userType == "REGULAR") ? "" : " (" + myUsers[userId].userType + " - " + myUsers[userId].company + ")";
             const userState = (myUsers[userId].userState == "ACTIVE") ? "" : " (" + myUsers[userId].userState + ")";
             const name = myUsers[userId].displayName + userType + userState;
+
+            adapter.log.debug("dpUsers: " + name + ", userId: (" + userId + ")");
 
             adapter.setObject(objName, {type: "channel",common: {name: name},native: {}});
 
@@ -629,6 +631,7 @@ const CircuitBot = function(){
 
     /** @function User Presence DP beim User anlegen @param {string} userId*/
     this.dpUsersPresence = function dpUsersPresence(userId) {
+        adapter.log.debug("dpUsersPresence(userId) mit userId = " + userId + " aufgerufen");
         const objName = "users." + myUsers[userId].userId;
 
         let index = -1;
