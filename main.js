@@ -301,7 +301,7 @@ function stateChange(id, state) {
             return;
         }
         standardContent.content = state.val; // den Text im StandardContent (mit der gewünschten parentId) gegen state.val des Datenpunktsaustauschen
-        adapter.log.debug("_sendToStandardConversation, addTextItem() mit standardConvId: " + standardConvId + ", Standard Content: " + standardContent);
+        adapter.log.debug("_sendToStandardConversation, addTextItem() mit standardConvId: " + standardConvId + ", Standard Content: " + JSON.stringify(standardContent));
         circuitBot.addTextItem(standardConvId,standardContent)
             .then(answer => {
                 const answerText = JSON.stringify(answer);
@@ -440,13 +440,15 @@ const CircuitBot = function(){
             return;
         }
         standardConvIdValid = true;
+        if(stdConvIdArr[1] === "undefined" || typeof stdConvIdArr[1] === "undefined") adapter.log.warn("itemId für Stanardkonversation ist undefinied");
+        const itemIdText = (stdConvIdArr[1] !== "error") ? " itemId: " + stdConvIdArr[1] : "";
         (stdConvIdArr[1] !== "error") ? standardContent.parentId = stdConvIdArr[1] : delete standardContent.parentId;
         standardConvId = stdConvIdArr[0];
         adapter.log.debug("standardContent: "+JSON.stringify(standardContent));
         adapter.log.info("standardConvId: " + standardConvId);
         adapter.log.debug("standardConvIdValid:" + standardConvIdValid);
 
-        adapter.setState("_sendToStandardConversationAnswer","Standardkonversation: " + standardConvId+ (stdConvIdArr[1] !== "error") ? " itemId: " + stdConvIdArr[1] : "",true );
+        adapter.setState("_sendToStandardConversationAnswer","Standardkonversation: " + standardConvId + itemIdText,true );
     }
 
 
@@ -633,6 +635,8 @@ const CircuitBot = function(){
         for (let i = 0; i < myUsersPresence.length; i++) {
             if (myUsersPresence[i].userId === userId) index = i;
         }
+
+        adapter.log.debug("dpUsersPresence: myUsersPresence[index].mobile: " + myUsersPresence[index].mobile + ", myUsersPresence[index]: " + JSON.stringify(myUsersPresence[index]));
 
         const mobileStr = (myUsersPresence[index].mobile) ? " (MOBILE)" : "";
 
@@ -1241,10 +1245,9 @@ const CircuitBot = function(){
                     resolve(res);
                 })
                 .catch(/** @param {object} error*/error => {
-                    const errorStr = JSON.stringify(error);
-                    adapter.log.debug("addTextItem(), error.message: " + error.message);
-                    adapter.log.debug("addTextItem(): " + errorStr);
-                    reject(new Error(error));
+                    // const errorStr = JSON.stringify(error);
+                    adapter.log.warn("addTextItem(), error.message: " + error.message);
+                    reject(new Error(error.message));
                 });
         });
 
