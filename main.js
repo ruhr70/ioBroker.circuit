@@ -272,6 +272,21 @@ function stateChange(id, state) {
         return;
     }
 
+    if(id === "abfragen.getItemById") {
+        circuitBot.getItemById(state.val)
+            .then(item => {
+                adapter.log.debug("DP getItemById abgefragt: " + state.val);
+                adapter.log.debug("DP getItemById Ergebnis: " + JSON.stringify(item));
+                adapter.setState("abfragen.getItemByIdAnswer", { val: JSON.stringify(item), ack: true });
+            })
+            .catch(error => {
+                adapter.log.info("DP getItemById abgefragt: "+ error.message);
+                adapter.setState("abfragen.getItemByIdAnswer", { val: "Error: "+ error.message, ack: true });
+            });
+        return;
+    }
+
+
     if(id === "commands.removeParticipant") {
         const command = state.val.replace(/"+|\[+|\]+/gm,"");
         const commandArr = command.split(",");
@@ -424,6 +439,7 @@ const CircuitBot = function(){
         if(!matchArr || matchArr.length < 1 ) {
             return ["error","error"];
         } 
+        if(matchArr.length === 1 ) matchArr[1] = "error";
         return matchArr;
     }
 
@@ -434,16 +450,48 @@ const CircuitBot = function(){
 
 
     /** @param {string|undefined} testStr String, der geprüft wir, ob ein gültiges Format für eine ConvID oder eine URL mit ConvId vorliegt. */
-    function testStandardConvId (testStr) {
+    async function testStandardConvId (testStr) {
         const stdConvIdArr = testConvId(testStr);
         if(stdConvIdArr[0] === "error") {
             infoNoValidConvId();
             return;
         }
+        adapter.log.debug("stdConvIdArr[1]: " + stdConvIdArr[1]);
+
         standardConvIdValid = true;
         if(stdConvIdArr[1] === "undefined" || typeof stdConvIdArr[1] === "undefined") adapter.log.warn("itemId für Stanardkonversation ist undefinied");
-        const itemIdText = (stdConvIdArr[1] !== "error") ? " itemId: " + stdConvIdArr[1] : "";
-        (stdConvIdArr[1] !== "error") ? standardContent.parentId = stdConvIdArr[1] : delete standardContent.parentId;
+        
+        let itemIdText = "";
+
+        if(stdConvIdArr[1] !== "error") {
+
+            await client.getItemById(stdConvIdArr[1])
+                .then(/** @param {object} item*/item => {
+                    adapter.log.debug("testStandardConvId: getItemById() item: "+ JSON.stringify(item));
+                    if(item && item.parentItemId) {
+                        standardContent.parentId = item.parentItemId;
+                        itemIdText = " itemId: " + item.parentItemId; 
+                        adapter.log.info("Standardkonversation, itemId wurde gegen die parentId ausgetauscht: " + item.parentItemId);
+                    } else {
+                        adapter.log.info("Standardkonversation, itemId ist die parentId des Themas: " + stdConvIdArr[1]);
+                        standardContent.parentId = stdConvIdArr[1]; 
+                        itemIdText = " itemId: " + stdConvIdArr[1];
+                    }
+                    // standardContent.parentId = stdConvIdArr[1]
+                    // itemIdText = " itemId: " + ???
+                })
+                .catch(/** @param {object} error*/error => {
+                    adapter.log.debug("testStandardConvId, getItemById() " + error.message);
+                });
+
+        } else {
+            adapter.log.info("Standardkonversation, keine itemId definiert. Nachricht ist immer eine einzelne Nachricht in der Konversation.");
+            delete standardContent.parentId;
+        }
+
+        // const itemIdText = (stdConvIdArr[1] !== "error") ? " itemId: " + stdConvIdArr[1] : "";
+        // TODO: itemId muss die echte parentId des Themas sein. Abfarge mit getItemById möglich? dann Austausch itemId gegen parentId
+        // (stdConvIdArr[1] !== "error") ? standardContent.parentId = stdConvIdArr[1] : delete standardContent.parentId;
         standardConvId = stdConvIdArr[0];
         adapter.log.debug("standardContent: "+JSON.stringify(standardContent));
         adapter.log.info("standardConvId: " + standardConvId);
@@ -1203,6 +1251,27 @@ const CircuitBot = function(){
         });
     };
 
+
+    //*********************************************************************
+    //* getItemById
+    //*********************************************************************
+
+    /** @param {string} itemId */
+    this.getItemById = function getItemById(itemId) {
+        return new Promise ((resolve, reject) => {
+            client.getItemById(itemId)
+                .then(/** @param {object} item*/item => {
+                    adapter.log.debug("[APP]: getItemById() item: "+ JSON.stringify(item));
+                    resolve(item);
+                })
+                .catch(/** @param {string} error*/error => {
+                    adapter.log.debug("getItemById() " + error);
+                    reject(new Error("getItemById() " + error));
+                });
+        });
+    };
+
+
     
     //*********************************************************************
     //* removeParticipant
@@ -1526,6 +1595,7 @@ function main() {
     adapter.subscribeStates("abfragen.getUserByEmail");
     adapter.subscribeStates("abfragen.getConversationParticipants");
     adapter.subscribeStates("abfragen.getConversationById");
+    adapter.subscribeStates("abfragen.getItemById");
 
     adapter.subscribeStates("commands.removeParticipant");
 
