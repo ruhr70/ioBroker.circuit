@@ -12,6 +12,11 @@ ioBroker stellt dabei die Middleware da, um Circuit z.B. Zugriff auf:
 
 zu ermöglichen.
 
+## Weitere Dokumentation zum Adapter
+
+- [sendTo() API Aufrufe](./docs/sendto-api-aufrufe.md)
+- [Dokumentation der internen Variablen des Circuit Adapters](./docs/myvars.md)
+
 ## Anwendungsfälle
 
 - Erstellung eines Bots für Circuit mit dem Zugang zu allen Möglichkeiten von ioBroker
@@ -159,22 +164,6 @@ Siehe dazu die [Dokumentation der internen Variablen des Circuit Adapters](./doc
 | circuit.0._sendToStandardConversation       | r/w | Schickt einen Text zu der Standardkonversation (Konfiguration im Admin)                                                | {string} |
 | circuit.0._sendToStandardConversationAnswer |  r  | Antwort der API der Methode addTextItem / oder vom Adapter, wenn z.B. keine gültige Standardkonversation vorhanden ist | {object} |
 |                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
-|                                             |     |                                                                                                                        |          |
 
 ## sendTo()
 
@@ -217,6 +206,8 @@ sendTo('circuit.0', "Meine Nachricht an die Standardkonversation Instanz 0 mit R
 ### sendTo() gezielt zur einer Konversation/Nachricht
 
 ### sendTo() API Aufrufe und Abfragen
+
+- [Dokumentation sendTo() API Aufrufe](./docs/sendto-api-aufrufe.md)
 
 ## Circuit SDK
 
