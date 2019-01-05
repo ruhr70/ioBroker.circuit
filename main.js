@@ -947,6 +947,12 @@ const CircuitBot = function(){
             self.eventConversationUpdated(evt);
         });
 
+        // Konversation mit dem Bot wurde erstellt
+        client.addEventListener("conversationCreated", /** @param {object} evt */ function (evt) {
+            //self.logEvent(evt);
+            self.eventConversationCreated(evt);
+        });
+
 
         /* mögliche Events:
 
@@ -957,7 +963,7 @@ const CircuitBot = function(){
         itemUpdated                     (verwendet)
         itemFlagged
         itemUnflagged
-        conversationCreated
+        conversationCreated             (verwendet)
         conversationUpdated             (verwendet)
         conversationArchived
         conversationFavorited
@@ -1051,7 +1057,29 @@ const CircuitBot = function(){
 
     };
 
+
+   
+    //*********************************************************************
+    //* eventConversationCreated
+    //*********************************************************************
+
+    /** @param {object} evt */
+    this.eventConversationCreated = async function eventConversationCreated(evt) {
+        adapter.log.info("eventConversationCreated() wird verarbeitet");
+
+        this.getConversationById(evt.conversation.convId)
+            .then(/** @param {object} conversation*/conversation => {
+                this.dpCconversations([conversation]);
+            })
+            .catch(/** @param {object} error*/error => {
+                adapter.log.debug("eventConversationCreated " + (error.message));
+            });
         
+        return;
+
+    };
+
+
     //*********************************************************************
     //* particiapantRemoved (nach event itemAdded)
     //*********************************************************************
