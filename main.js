@@ -399,8 +399,9 @@ const CircuitBot = function(){
 
             testStandardConvId(adapter.config.standardconversation);
             await self.dpCconversations(conversations,true);
+            await self.dpMyUsersPresence(); // myPresence schreiben -> aktueller Präsenz ALLER User (in myPresence und dem DP)
             await self.dpUsers(myUsers);
-            self.dpMyUsersPresence(); // myPresence schreiben -> aktueller Präsenz ALLER User (in myPresence und dem DP)
+
             
         } catch(err) {
             adapter.log.warn("initDp(): " + err);    
@@ -640,8 +641,8 @@ const CircuitBot = function(){
             if (myUsersPresence[i].userId === userId) index = i;
         }
 
-        adapter.log.debug("dpUsersPresence:  myUsersPresence[index]" +  myUsersPresence[index]);
-        adapter.log.debug("dpUsersPresence:  myUsersPresence[index].mobile" +  myUsersPresence[index].mobile);
+        adapter.log.debug("dpUsersPresence:  myUsersPresence[index]: " +  myUsersPresence[index]);
+        adapter.log.debug("dpUsersPresence:  myUsersPresence[index].mobile: " +  myUsersPresence[index].mobile);
         adapter.log.debug("dpUsersPresence: myUsersPresence[index].mobile: " + myUsersPresence[index].mobile + ", myUsersPresence[index]: " + JSON.stringify(myUsersPresence[index]));
 
         const mobileStr = (myUsersPresence[index].mobile) ? " (MOBILE)" : "";
