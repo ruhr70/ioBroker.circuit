@@ -625,15 +625,19 @@ const CircuitBot = function(){
     /** @function fragt die Presence ALLER User über die API ab, setzt die Subscriptions für Presence und schreibt die globale Variabe myPresence */
     this.dpMyUsersPresence = async function dpMyUsersPresence() {
         try {
-            if(!initMyVarsOK) adapter.log.warn("myUsers ist noch leer, wird aber benötigt");
-            adapter.log.debug("dpMyUsersPresence(): myUsersList: " + myUsersList);
-            myUsersPresence = await client.getPresence(myUsersList,true); // aktuelle Präsenz aller User (myUsersList) über die API abfragen (true => erweiterte Präsenz)
-            adapter.log.debug("dpMyUsersPresence(): myUsersPresence: " + JSON.stringify(myUsersPresence));
-    
-            client.subscribePresence(myUsersList); // aktuelle Präsenz aller User (myUsersList) über die API abonieren
-    
-            adapter.setObjectNotExists("variablen.myUsersPresence", {type: "state",common: {name: "App Variable myUsersPresence",type:"string",role:"info",read:true,write:false},native: {}});
-            adapter.setState("variablen.myUsersPresence",JSON.stringify(myUsersPresence),true);
+            if(!initMyVarsOK) adapter.log.warn("dpMyUsersPresence() myUsers ist noch leer, wird aber benötigt. myUsers: " + JSON.stringify(myUsers));
+            if(myUsersList.length > 0) {
+                adapter.log.debug("dpMyUsersPresence(): myUsersList: " + myUsersList);
+                myUsersPresence = await client.getPresence(myUsersList,true); // aktuelle Präsenz aller User (myUsersList) über die API abfragen (true => erweiterte Präsenz)
+                adapter.log.debug("dpMyUsersPresence(): myUsersPresence: " + JSON.stringify(myUsersPresence));
+        
+                client.subscribePresence(myUsersList); // aktuelle Präsenz aller User (myUsersList) über die API abonieren
+        
+                adapter.setObjectNotExists("variablen.myUsersPresence", {type: "state",common: {name: "App Variable myUsersPresence",type:"string",role:"info",read:true,write:false},native: {}});
+                adapter.setState("variablen.myUsersPresence",JSON.stringify(myUsersPresence),true);
+            } else {
+                adapter.log.info("Noch keine User in einer Bot Konversation vorhanden (myUsersList.length <1)");
+            }
                 
         } catch (error) {
             adapter.log.warn("dpMyUsersPresence(): " + error);    
