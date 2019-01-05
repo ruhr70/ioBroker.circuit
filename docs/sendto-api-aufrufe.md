@@ -1,5 +1,15 @@
 # Beschreibung Circuit API Aufrufe über sendTo()
 
+## Bereitgestellte API Funktionen
+
+Übersicht der aus dem SDK bereitgestellten API Funktionen:
+
+- getConversationById(convId)
+- getConversationParticipants(convId,[options])
+- getConversations ([options])
+
+## Informationen zu sendTo()
+
 [Beschreibung von sendTo() vom ioBorker JavaScript Adapter](https://github.com/ioBroker/ioBroker.javascript/blob/master/doc/en/javascript.md#sendto)
 
 Dieses Kapitel enthält die Beschreibung der direkten API Aufrufe über ```sendTo()```. Die weiteren Möglichkeiten mit ```sendTo()```, wie z.B. das direkte Senden eines Textstrings an an die eingestellte Standardkonversation sind in der [**README.md**](./../README.md) beschrieben.
