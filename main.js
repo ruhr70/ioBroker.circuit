@@ -972,7 +972,7 @@ const CircuitBot = function(){
         conversationUserDataChanged
         conversationReadItems
         userPresenceChanged             (verwendet)
-        userUpdated
+        userUpdated                                -> TODO: erst myUsers aktualisieren, dann this.dpUsers
         connectionStateChanged          (verwendet)
         sessionTokenRenewed
         reconnectFailed
