@@ -262,7 +262,6 @@ Der Adapter wurde unter folgenden SDK Versionen getestet:
 
 ## Todos und bekannte Probleme
 
-- sendTo freischalten und testen
 - command: addTextItem mit Beschreibung aus dem SDK
 - Schalter in der Konfiguration für Beispielantworten an/aus
 
