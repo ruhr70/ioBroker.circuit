@@ -50,7 +50,7 @@ zu ermöglichen.
 - Anmeldeseite [Try Circuit for Free](https://c634374841861722040-pdigitalchannel-l2-i1.digitalchannel.unify.com/#/category/515)
 
 - YouTubeVideo über Unify Circuit  
-  [![Video über Unify Circuit](https://img.youtube.com/vi/VID/0.jpg)](https://www.youtube.com/watch?v=nl8eELJzxPc&feature=youtu.be)
+  [![Video über Unify Circuit](./pics/youtube.png)](https://www.youtube.com/watch?v=nl8eELJzxPc&feature=youtu.be)
 
 ## Voraussetzungen vor der Installation
 
@@ -138,11 +138,13 @@ Circuit Domain (Sandbox oder einer der Produktivdomainen), für die der OAuth Ac
 
 Wenn eine Standardkonversation angegeben wurde, dann kann über den Datenpunkt ```circuit.0._sendToStandardConversation``` (wobei die **0** für die Instanz 0 steht) direkt ein Text in diese Konversation gesendet werden.
 
+**HInweis:** der Bot muss Teilnehmer der Konversation sein
+
 Ebenso kann aus anderen Adaptern oder einem JavaScript per ```sendTo('circuit', "Meine Nachricht an die Standardkonversaton");``` eine Nachricht an die Standardkonversation geschickt werden.
 
 **Mögliche Werte in der Konfiguration zum Adapter für die Standardkonversation**:
 
-Wird eine itemId, bzw. eine URL mit itemId aneggeben, erscheinen alle Nachrichten innerhalb dieses Themas (Item) in der Konversation. Ohne itemId wird jeweils eine einzelne Nachricht in die Konversation egschickt.
+Wird eine itemId, bzw. eine URL mit itemId angegeben, erscheinen alle Nachrichten innerhalb dieses Themas (Item) in der Konversation. Ohne itemId wird jeweils eine einzelne Nachricht in die Konversation egschickt.
 
 | Eintrag              | Beispiel                                                                                                                   | Ziel                                   |
 |----------------------|----------------------------------------------------------------------------------------------------------------------------|----------------------------------------|
@@ -150,6 +152,14 @@ Wird eine itemId, bzw. eine URL mit itemId aneggeben, erscheinen alle Nachrichte
 | ConvId,ItemId        | a9a5e9b3-6d5a-43b6-89ee-99b748973a9a,59b59546-0a4a-421a-9897-e1f57250b372                                                  | Nachricht wird an ein Thema angehangen |
 | url zur Konversation | <https://circuitsandbox.net/#/conversation/a9a5e9b3-6d5a-43b6-89ee-99b748973a9a>                                           | Eigene Nachricht in der Konversation   |
 | url zur Nachricht    | <https://circuitsandbox.net/#/conversation/a9a5e9b3-6d5a-43b6-89ee-99b748973a9a?item=59b59546-0a4a-421a-9897-e1f57250b372> | Nachricht wird an ein Thema angehangen |
+
+**Woher bekommt man die convId der gewünschten Konversation:**
+
+Möglichkeit 1: Die URL kopieren, wenn man in Circuit in der gewünschten Konversation ist
+
+Möglichkeit 2: Im Circuit CLient die rechte Maustaste innerhalb der Konversation drücken und dann **Link dieser Konversation kopieren** (dann wird jeder Bot Nachricht als Einzelnachricht in eine Konversation geschickt) oder innerhalb des gewünschten Themas **Link dieser Nachricht** kopieren (dann schreibt der Bot seine Nachrichten immer am Ende des Themas).
+
+Die kopierte URL (mit oder ohne itenId/Nachrichtenkennung) kann dann direkt in der Konfiguration des Adapters eingefügt werden.
 
 ## Datenpunkte
 
