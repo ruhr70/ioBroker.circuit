@@ -483,6 +483,30 @@
             "native": {}
         },
         {
+            "_id": "abfragen.getItemById",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Abfrage eines Items per itemId",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "abfragen.getItemByIdAnswer",
+            "type": "state",
+            "common": {
+                "role": "info",
+                "name": "Antwort itemId",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
             "_id": "commands",
             "type": "channel",
             "common": {
