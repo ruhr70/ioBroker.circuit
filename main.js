@@ -62,6 +62,10 @@ const standardContent = {
     content: "kein Inhalt"
 };
 
+
+let infoBotEmail = "";
+
+
 //*********************************************************************
 //* globale Funktionen
 //*********************************************************************
@@ -376,6 +380,7 @@ const CircuitBot = function(){
                     adapter.setState("info.bot.logonJson", JSON.stringify(user),true);
                     adapter.setState("info.bot.name", user.displayName,true);
                     adapter.setState("info.bot.emailAddress", user.emailAddress,true);
+                    infoBotEmail = user.emailAddress;
                     adapter.setState("info.circuit.apiVersion", user.apiVersion,true);
                     adapter.setState("info.bot.userId", user.userId,true);
                     adapter.setState("info.bot.accountId", user.accounts[0].accountId,true);
@@ -443,7 +448,7 @@ const CircuitBot = function(){
         return matchArr;
     }
 
-    function infoNoValidConvId() {
+    function writeInfoNoValidConvId() {
         adapter.log.info("Keine gültige Standard-ConvId gefunden");
         adapter.setState("_sendToStandardConversationAnswer","Keine gültige Standard-ConvId gefunden",true);
     }
@@ -453,7 +458,7 @@ const CircuitBot = function(){
     async function testStandardConvId (testStr) {
         const stdConvIdArr = testConvId(testStr);
         if(stdConvIdArr[0] === "error") {
-            infoNoValidConvId();
+            writeInfoNoValidConvId();
             return;
         }
         adapter.log.debug("stdConvIdArr[1]: " + stdConvIdArr[1]);
@@ -767,7 +772,7 @@ const CircuitBot = function(){
     this.messageHelper = function messageHelper(obj) {
         // nur string als Message => Text wird an die Standardkonversation geschickt
         if(typeof obj.message === "string") {
-            if(!infoNoValidConvId) {
+            if(!standardConvIdValid) {
                 const callback = "Error, sendTo(text) keine gültige Standardkonversation in der Konfiguration";
                 adapter.log.warn(callback);
                 if (obj.callback) adapter.sendTo(obj.from, obj.command, callback, obj.callback);
@@ -1389,7 +1394,8 @@ const CircuitBot = function(){
     this.reciveItem = async function reciveItem(evt) {
 
         if(evt && evt.type === "itemAdded") {
-            if(evt && evt.item && evt.item.system && evt.item.system.type === "PARTICIPANT_REMOVED") {
+            if(evt.item && evt.item.system && evt.item.system.type === "PARTICIPANT_REMOVED") {
+                adapter.log.debug("reviceItem() 'PARTICIPANT_REMOVED' empfangen");
                 this.particiapantRemoved(evt);
                 return;
             }
@@ -1452,11 +1458,31 @@ const CircuitBot = function(){
 
             const user = await self.getUserById(userId);
 
+            // Textrückmeldungen:
+            // item.text.content        kompletter Text in html
+            // rawText                  reiner Text, inkl. aller Textupdates
+            // lastRawText              nur der reine Text des letzten Updates
+
+            const hrText = "<itemUpdated>"; // Text gegen das "<hr>"" ersetzt werdden soll
+
             let rawText = item.text.content.replace(/<span class="mention".*span> */gm, ""); //mention rausfiltern
-            rawText = htmlToText.fromString(rawText); // restliches html rausfiltern
-            adapter.log.info("[APP]: reciveItem(): von: " + user.displayName + " #  Subject: " + item.text.subject + " # Orginaltext: " + item.text.content);
+            // rawText = htmlToText.fromString(rawText); // restliches html rausfiltern
+
+            rawText = htmlToText.fromString(rawText, {
+                // @ts-ignore
+                format: {
+                    horizontalLine: function () {
+                        return hrText; 
+                    }
+                }
+            }); // restliches html rausfiltern => <hr> bleibt <hr> !!! ACHTUNG, ggf. ändern. ein getipptes <hr> ist auch <hr> und nicht zu unterscheiden !!!
+
+            const lastRawText = (itemUpdated) ? rawText.substr(rawText.lastIndexOf(hrText)+hrText.length,rawText.length) : rawText;
+
+            adapter.log.debug("[APP]: reciveItem(): von: " + user.displayName + " #  Subject: " + item.text.subject + " # Orginaltext: " + item.text.content);
             // adapter.log.debug("[APP]: reciveItem(): von: " + user.displayName + " # Subject: " + item.text.subject + " # rawText: " + htmlToText.fromString(item.text.content));
-            adapter.log.info("[APP]: reciveItem(): von: " + user.displayName + " # Subject: " + item.text.subject + " # rawText ohne mention: '" + rawText + "'");
+            adapter.log.debug("[APP]: reciveItem(): von: " + user.displayName + " # Subject: " + item.text.subject + " # rawText ohne mention: '" + rawText + "'");
+            adapter.log.info("[APP]: reciveItem(): von: " + user.displayName + " # Subject: " + item.text.subject + " # lastRawText ohne mention: '" + lastRawText + "'");
 
             if(user && user.userType === "BOT") {
                 adapter.log.debug("[APP]: reciveItem(): skip it - another bot");
@@ -1472,18 +1498,19 @@ const CircuitBot = function(){
             }
             // adapter.log.debug("[APP]: reciveItem(): Anzahl Teilnehmer ohne Bot: " + resParticipants.participants.length);
             // adapter.log.debug("[APP]: reciveItem(): resParticipants: " + JSON.stringify(resParticipants));
-            adapter.log.debug("[APP]: reciveItem(): Anzahl Teilnehmer ohne Bot: " + participants.length);
-            adapter.log.debug("[APP]: reciveItem(): resParticipants: " + JSON.stringify(participants));
+            adapter.log.debug("[APP]: reciveItem(): Anzahl Teilnehmer (Bot nicht mitgezählt): " + participants.length);
+            adapter.log.debug("[APP]: reciveItem(): resParticipants (Array der Teilnehmer userIds): " + JSON.stringify(participants));
 
 
             // -------------------------------------
             // Antworten des Bots auf eine Nachricht
             // -------------------------------------
 
+            
             // Antwort, wenn der Bot angesprochen (mention) wurde
             if(mentioned) {
                 adapter.log.info("[APP]: reciveItem(): Bot wurde angeschrieben (mention)");
-                if(rawText.length === 0) { // Antwort bei Mention an den Bot ohne Inhalt
+                if(lastRawText.length === 0) { // Antwort bei Mention an den Bot ohne Inhalt
                     const content = "Hallo " + user.firstName + "<br><br>Ich bin für Dich da :-)";
                     self.sendItem(convId, parentId, content);
                     return;
@@ -1493,6 +1520,7 @@ const CircuitBot = function(){
                 }
             }
 
+            adapter.log.debug("[APP]: reciveItem(): Typ der Konversation: " + myConversations[convId].type);
             // Antwort bei Direktkommunikation
             if(myConversations[convId].type === "DIRECT") {
                 const content = "hallo " + user.firstName;
@@ -1501,7 +1529,7 @@ const CircuitBot = function(){
             }
 
             // Verarbeitung, wenn andere User angesprochen (mention) wurden, aber nicht der Bot
-            if(!mentioned && mentionedUsersNumber >0) {
+            if(!mentioned && (mentionedUsersNumber >0)) {
                 adapter.log.info("[APP]: reciveItem(): Teilnehmer wurden angeschrieben (mention), aber nicht der Bot");
             }
 
@@ -1510,9 +1538,11 @@ const CircuitBot = function(){
             const content = "reciveItem(): " + err;
             self.sendItem(convId, parentId, content);
         }
-    };// end reciveItem
+    }; // end reciveItem()
 
-};
+}; // end Class CircuitBot
+
+
 
 
 
