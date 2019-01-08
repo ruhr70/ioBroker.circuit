@@ -12,6 +12,7 @@
 // Typdefinitionen im Skript auf Basis von JSDoc Support in Javascript:
 // https://github.com/Microsoft/TypeScript/wiki/JSDoc-support-in-JavaScript
 //
+//
 
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
