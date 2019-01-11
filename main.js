@@ -12,7 +12,8 @@
 // Typdefinitionen im Skript auf Basis von JSDoc Support in Javascript:
 // https://github.com/Microsoft/TypeScript/wiki/JSDoc-support-in-JavaScript
 //
-//
+
+"use strict";
 
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
@@ -28,8 +29,12 @@ const utils = require("@iobroker/adapter-core");
 // Zur Umwandlung in Raw-Text wird das npm Modul html-to-text eingebunden
 const htmlToText = require("html-to-text");
 
+const cron = require("node-cron");
+
+
 // @ts-ignore // Circuit SDK - keine  @types vorhanden
 const Circuit = require("circuit-sdk");
+
 
 
 
@@ -357,6 +362,8 @@ const CircuitBot = function(){
     /** @type {object} */
     let client = null;
 
+
+
     //*********************************************************************
     //* logon
     //*********************************************************************
@@ -392,6 +399,8 @@ const CircuitBot = function(){
                     adapter.setState("info.bot.lastAccessTxt", datumFomatieren(user.accounts[0].lastAccess),true);
                     adapter.setState("info.bot.creationTimeTxt", datumFomatieren(user.accounts[0].creationTime),true);
                     listenersOK = false; // Test-Flag wieder auf false gesetzt, wg. Reconnect Überwachung (TODO prüfen, ob es so Sinn macht)
+
+
                     return;
 
                 })
@@ -399,6 +408,7 @@ const CircuitBot = function(){
                     //adapter.log.info("[APP]: Presence updated to AVAILABLE");
                     adapter.log.debug("[APP]: Logon ready");
                     self.initDp();
+
                     resolve();
                 })
                 .catch(reject);
@@ -422,6 +432,20 @@ const CircuitBot = function(){
             await self.dpCconversations(conversations,true);
             await self.dpMyUsersPresence(); // myPresence schreiben -> aktueller Präsenz ALLER User (in myPresence und dem DP)
             await self.dpUsers(myUsers);
+
+
+            // Events für Präsenzänderungen hörten nach Zeit auf
+            // Lösungsweg corn.schedule
+            // Testen, ob renewSessionToken() UND subscribePresence(myUsersList) notwendig sind
+            // ider ob eins von beiden ausreicht
+            cron.schedule("0 * * * *", function() {
+                client.renewSessionToken()
+                    .then(() => {
+                        adapter.log.debug("Session token renewed");
+                        self.subscribePresence(myUsersList); // aktuelle Präsenz aller User (myUsersList) über die API abonieren
+                    });
+            });
+
 
             
         } catch(err) {
@@ -637,7 +661,7 @@ const CircuitBot = function(){
                 myUsersPresence = await client.getPresence(myUsersList,true); // aktuelle Präsenz aller User (myUsersList) über die API abfragen (true => erweiterte Präsenz)
                 adapter.log.debug("dpMyUsersPresence(): myUsersPresence: " + JSON.stringify(myUsersPresence));
         
-                client.subscribePresence(myUsersList); // aktuelle Präsenz aller User (myUsersList) über die API abonieren
+                this.subscribePresence(myUsersList); // aktuelle Präsenz aller User (myUsersList) über die API abonieren
         
                 adapter.setObjectNotExists("variablen.myUsersPresence", {type: "state",common: {name: "App Variable myUsersPresence",type:"string",role:"info",read:true,write:false},native: {}});
                 adapter.setState("variablen.myUsersPresence",JSON.stringify(myUsersPresence),true);
@@ -703,9 +727,13 @@ const CircuitBot = function(){
         adapter.log.debug("dpUsersPresence:  myUsersPresence[index].mobile: " +  myUsersPresence[index].mobile);
 
         const mobileStr = (myUsersPresence[index].mobile) ? " (MOBILE)" : "";
+        const nameStr = (myUsersPresence[index].isOptedOut) ? " (PRÄSENZ UNTERDRÜCKT)" : myUsersPresence[index].state + mobileStr;
 
-        adapter.setObject(objName+".presence", {type: "channel",common: {name: myUsersPresence[index].state + mobileStr},native: {}});
+        adapter.setObject(objName+".presence", {type: "channel",common: {name: nameStr},native: {}});
 
+        adapter.setObjectNotExists(objName+".presence.stateBool", {type: "state",common: {name: "Aktuelle Präsenz als Boolean für Statistik (AVAILABLE + BUSY = true.",type:"boolean",role:"info",read:true,write:false},native: {}});
+        adapter.setObjectNotExists(objName+".presence.stateBoolAvailable", {type: "state",common: {name: "Aktuelle Präsenz als Boolean für Statistik ( nur AVAILABLE + (MOBILE) = true",type:"boolean",role:"info",read:true,write:false},native: {}});
+        adapter.setObjectNotExists(objName+".presence.stateBoolBUSY", {type: "state",common: {name: "Aktuelle Präsenz als Boolean für Statistik ( nur BUSY = true -> Nutzung)",type:"boolean",role:"info",read:true,write:false},native: {}});
         adapter.setObjectNotExists(objName+".presence.state", {type: "state",common: {name: "Aktuelle Präsenz",type:"string",role:"text",read:true,write:false},native: {}});
         adapter.setObjectNotExists(objName+".presence.stateInclMobile", {type: "state",common: {name: "Aktuelle Präsenz inklusive Mobil",type:"string",role:"text",read:true,write:false},native: {}});
         adapter.setObjectNotExists(objName+".presence.mobile", {type: "state",common: {name: "mobile",type:"boolean",role:"info",read:true,write:false},native: {}});
@@ -715,8 +743,17 @@ const CircuitBot = function(){
         adapter.setObjectNotExists(objName+".presence.time", {type: "state",common: {name: "Zeitstempel Epoche durch den Adapter geschrieben",type:"number",role:"info",read:true,write:false},native: {}});
         adapter.setObjectNotExists(objName+".presence.timeStr", {type: "state",common: {name: "Zeitstempel lesbar durch den Adapter geschrieben",type:"string",role:"info",read:true,write:false},native: {}});
 
+
+        // TODO: beim Start des Adapters sind die Werte leer, erst bei Änderung der User Presänz. prüfen warum
+        const stateBoolAvailable  = (myUsersPresence[index].state === "AVAILABLE") ? true : false;
+        const stateBoolBusy  = (myUsersPresence[index].state === "BUSY") ? true : false;
+        const stateBool = (stateBoolAvailable || stateBoolBusy) ? true : false;
+        
+        adapter.setState(objName+".presence.stateBool",stateBool,true);
+        adapter.setState(objName+".presence.stateBoolAvailable",stateBoolAvailable,true);
+        adapter.setState(objName+".presence.stateBoolBUSY",stateBoolBusy,true);
         adapter.setState(objName+".presence.state",myUsersPresence[index].state,true);
-        adapter.setState(objName+".presence.stateInclMobile",myUsersPresence[index].state + mobileStr,true);
+        adapter.setState(objName+".presence.stateInclMobile",nameStr,true);
         adapter.setState(objName+".presence.mobile",myUsersPresence[index].mobile,true);
         adapter.setState(objName+".presence.poor",myUsersPresence[index].poor,true);
         adapter.setState(objName+".presence.isOptedOut",myUsersPresence[index].isOptedOut,true);
@@ -1017,12 +1054,13 @@ const CircuitBot = function(){
         const displayName = myUsers[userId].displayName;
         // adapter.log.info("[APP]: event received: " + displayName + " " + util.inspect(evt, { showHidden: true, depth: null }));	
         adapter.log.info("[APP]: event received: " + displayName + " " + JSON.stringify(evt));
-
+        
         let index = -1;
         for (let i = 0; i < myUsersPresence.length; i++) {
             if (myUsersPresence[i].userId === userId) index = i;
         }
 
+        adapter.log.debug("myUsersPresence index: " + index + " - alter Wert: "+ JSON.stringify(myUsersPresence[index]));
         adapter.log.debug("myUsersPresence index: " + index + " - neuer Wert: " + JSON.stringify(evt.presenceState));
         myUsersPresence[index] = evt.presenceState; // neuer Präsenzstatus für den User austauschen
         adapter.setState("variablen.myUsersPresence",JSON.stringify(myUsersPresence),true); // DP für myUsersPresence schreiben
@@ -1179,7 +1217,25 @@ const CircuitBot = function(){
         return (client.loggedOnUser.userId === item.creatorId);
     };
 
+    //*********************************************************************
+    //* subscribePresence
+    //*********************************************************************
+    /** @param {Array.<string>} userIds */    
+    this.subscribePresence = function subscribePresence(userIds) {
+        return new Promise ((resolve, reject) => {
+            client.subscribePresence(userIds)
+                .then(() => {
+                    adapter.log.debug("subscribePresence() Successfully subscribed");
+                    resolve("subscribePresence() Successfully subscribed");
+                })
+                .catch(/** @param {object} error*/error => {
+                    adapter.log.debug("subscribePresence() " + error.message);
+                    reject(new Error("subscribePresence() " + error.message));
+                });
+        });
+    };
 
+        
     //*********************************************************************
     //* getUserById - UserID -> gibt das User Objekt zurück
     //*********************************************************************
@@ -1367,6 +1423,8 @@ const CircuitBot = function(){
     };
 
 
+
+
     //*********************************************************************
     //* sendItem
     //*********************************************************************
@@ -1507,6 +1565,8 @@ const CircuitBot = function(){
             // Antworten des Bots auf eine Nachricht
             // -------------------------------------
 
+
+            // lastRawtext => nicht die komplette Nachricht, sondern nur nach dem letzten Enter
             
             // Antwort, wenn der Bot angesprochen (mention) wurde
             if(mentioned) {
@@ -1556,6 +1616,10 @@ const circuitBot = new CircuitBot();
 
 
 
+
+//*********************************************************************
+//* regelmässie Wiederholung
+//*********************************************************************
 
 
 //*********************************************************************
