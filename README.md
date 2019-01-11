@@ -1,7 +1,7 @@
 # ioBroker Unify Circuit Adapter
 
 ![Circuit](./pics/circuit_120.png)
-  
+
 Der ioBroker Circuit Adapter dient zur Anbindung von der Unify Cloud Kollaboration Lösung Circuit an ioBroker, z.B. zur Erstellung eines Bots.
 
 ioBroker stellt dabei die Middleware da, um Circuit z.B. Zugriff auf:
