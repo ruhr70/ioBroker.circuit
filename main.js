@@ -29,7 +29,7 @@ const utils = require("@iobroker/adapter-core");
 // Zur Umwandlung in Raw-Text wird das npm Modul html-to-text eingebunden
 const htmlToText = require("html-to-text");
 
-const cron = require("node-cron");
+const Job = require('cron').CronJob;
 
 
 // @ts-ignore // Circuit SDK - keine  @types vorhanden
@@ -438,7 +438,7 @@ const CircuitBot = function(){
             // Lösungsweg corn.schedule
             // Testen, ob renewSessionToken() UND subscribePresence(myUsersList) notwendig sind
             // ider ob eins von beiden ausreicht
-            cron.schedule("0 * * * *", function() {
+            new CronJob("0 * * * *", function() {
                 client.renewSessionToken()
                     .then(() => {
                         adapter.log.debug("Session token renewed");
